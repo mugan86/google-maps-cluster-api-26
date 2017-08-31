@@ -30,11 +30,11 @@ class MainActivity : BaseGoogleMapsActivity() {
         googleMap.setOnCameraIdleListener(mClusterManager)
         googleMap.setOnMarkerClickListener(mClusterManager)
         googleMap.setOnInfoWindowClickListener(mClusterManager)
-        addPersonItems()
+        addPlaceItems()
         mClusterManager!!.cluster()
     }
 
-    private fun addPersonItems() {
+    private fun addPlaceItems() {
         for (i in 0..2) {
             mClusterManager!!.addItem(Place(43.181706, -2.475803, "Ipurua Footbal Stadium", "https://es.m.wikipedia.org/wiki/Estadio_Municipal_de_Ipurua"))
             mClusterManager!!.addItem(Place(43.182316646663544, -2.478768825531006, "Ipurua Sport Centre", "https://es.m.wikipedia.org/wiki/Polideportivo_de_Ipurúa"))
