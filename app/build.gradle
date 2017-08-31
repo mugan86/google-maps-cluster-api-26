@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-
+apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 26
@@ -29,5 +29,6 @@ dependencies {
     compile "com.android.support:appcompat-v7:$support_version"
     compile "com.google.android.gms:play-services-maps:$gsm_version"
     compile "com.google.maps.android:android-maps-utils:$maps_utils_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     testCompile 'junit:junit:4.12'
 }
