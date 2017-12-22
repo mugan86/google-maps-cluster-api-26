@@ -19,6 +19,10 @@ class MainActivity : BaseGoogleMapsActivity()  {
         super.onCreate(savedInstanceState)
     }
 
+    override fun onResume() {
+        super.onResume()
+    }
+
     override fun onMapReady(googleMap: GoogleMap) {
         setupMap(googleMap)
         //Sidney location
