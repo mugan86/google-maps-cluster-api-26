@@ -1,43 +1,18 @@
 package com.amldev.clustersmap
 
-import android.content.Context
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.widget.Toast
-
+import com.amldev.clustersmap.adapter.PopupAdapter
 import com.amldev.clustersmap.model.Place
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.maps.android.clustering.Cluster
 import com.google.maps.android.clustering.ClusterManager
-import com.google.maps.android.clustering.view.DefaultClusterRenderer
 
 
+class MainActivity : BaseGoogleMapsActivity()  {
 
-
-class MainActivity : BaseGoogleMapsActivity() , ClusterManager.OnClusterClickListener<Place>,
-ClusterManager.OnClusterInfoWindowClickListener<Place>,
-ClusterManager.OnClusterItemClickListener<Place>,
-ClusterManager.OnClusterItemInfoWindowClickListener<Place> {
-    override fun onClusterItemInfoWindowClick(p0: Place?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onClusterClick(p0: Cluster<Place>?): Boolean {
-        Toast.makeText(this, "Click", Toast.LENGTH_LONG).show()
-        return true
-    }
-
-    override fun onClusterInfoWindowClick(p0: Cluster<Place>?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onClusterItemClick(p0: Place?): Boolean {
-        Toast.makeText(this, "${p0!!.lat}, ${p0.lng}", Toast.LENGTH_LONG).show()
-        return true
-    }
 
     private var mClusterManager: ClusterManager<Place>? = null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,19 +26,56 @@ ClusterManager.OnClusterItemInfoWindowClickListener<Place> {
 
         mClusterManager = ClusterManager(this, googleMap)
 
+        val renderer = RenderClusterInfoWindow(this, googleMap, this.mClusterManager!!)
+
+        mClusterManager!!.setRenderer(renderer)
+
         googleMap.setOnCameraIdleListener(mClusterManager)
         googleMap.setOnMarkerClickListener(mClusterManager)
         googleMap.setOnInfoWindowClickListener(mClusterManager)
-        mClusterManager!!.setOnClusterClickListener(this)
-        mClusterManager!!.setOnClusterInfoWindowClickListener(this)
-        mClusterManager!!.setOnClusterItemClickListener(this)
-        mClusterManager!!.setOnClusterItemInfoWindowClickListener(this)
+
+        mClusterManager!!.setOnClusterClickListener(
+            ClusterManager.OnClusterClickListener<Place> {
+                Toast.makeText(this@MainActivity, "Cluster click", Toast.LENGTH_SHORT).show()
+                false
+        })
+
+        mClusterManager!!.setOnClusterItemClickListener(
+                ClusterManager.OnClusterItemClickListener<Place> {
+                    Toast.makeText(this@MainActivity, "Cluster item click", Toast.LENGTH_SHORT).show()
+
+                    // if true, click handling stops here and do not show info view, do not move camera
+                    // you can avoid this by calling:
+                    // renderer.getMarker(clusterItem).showInfoWindow();
+
+                    false
+                })
+
+        mClusterManager!!.getMarkerCollection()
+                .setOnInfoWindowAdapter(PopupAdapter(LayoutInflater.from(this)))
+
+        mClusterManager!!.setOnClusterItemInfoWindowClickListener(
+                ClusterManager.OnClusterItemInfoWindowClickListener<Place> { stringClusterItem ->
+                    Toast.makeText(this@MainActivity, "Clicked info window: " + stringClusterItem.lat + ", "  + stringClusterItem.lng,
+                            Toast.LENGTH_SHORT).show()
+                })
+
+        googleMap.setOnInfoWindowClickListener(mClusterManager)
+        googleMap.setInfoWindowAdapter(mClusterManager!!.getMarkerManager());
+
         addPlaceItems()
         mClusterManager!!.cluster()
 
     }
 
+
+
     private fun addPlaceItems() {
+        for (i in 0..20) {
+            val latLng = LatLng((-34 + i).toDouble(), (151 + i).toDouble())
+            mClusterManager!!.addItem(Place( latLng.latitude, latLng.longitude, "Marker #" + (i + 1)))
+        }
+
         // mClusterManager!!.addItem(Place(43.181706, -2.475803, "Ipurua Footbal Stadium", "https://es.m.wikipedia.org/wiki/Estadio_Municipal_de_Ipurua"))
         // mClusterManager!!.addItem(Place(43.182316646663544, -2.478768825531006, "Ipurua Sport Centre", "https://es.m.wikipedia.org/wiki/Polideportivo_de_Ipurúa"))
         // mClusterManager!!.addItem(Place(43.18255818906789, -2.480659782886505, "Eroski Ipurua Supermarket", "https://www.eroski.es/localizador-de-tiendas/hipermercado/gipuzkoa/eibar/eroski-eibar/"))
@@ -95,18 +107,5 @@ ClusterManager.OnClusterItemInfoWindowClickListener<Place> {
 
 
 
-    }
-
-    private inner class RenderClusterInfoWindow internal constructor(context: Context, map: GoogleMap, clusterManager: ClusterManager<Place>) : DefaultClusterRenderer<Place>(context, map, clusterManager) {
-
-        override fun onClusterRendered(cluster: Cluster<Place>?, marker: Marker?) {
-            super.onClusterRendered(cluster, marker)
-        }
-
-        override fun onBeforeClusterItemRendered(item: Place?, markerOptions: MarkerOptions?) {
-            markerOptions!!.title(item!!.name)
-
-            super.onBeforeClusterItemRendered(item, markerOptions)
-        }
     }
 }
