@@ -7,7 +7,7 @@ import com.google.maps.android.clustering.ClusterItem
  * Created by anartzmugika on 31/8/17.
  */
 
-class Place(lat: Double, lng: Double, var name: String?, var url: String?) : ClusterItem {
+class Place(val lat: Double, val lng: Double, var name: String? = "", var url: String? = "") : ClusterItem {
 
     fun getmPosition(): LatLng = mPosition
 
